@@ -3,7 +3,7 @@ import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import { createServerClient } from '@/lib/supabase'
 export const dynamic = 'force-dynamic'
-export const dynamic = 'force-dynamic'
+
 export default async function AdminPage() {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
