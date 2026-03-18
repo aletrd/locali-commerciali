@@ -169,3 +169,4 @@ farà il deploy automaticamente.
 | **Totale fisso** | | **~€45/mese** |
 
 
+
