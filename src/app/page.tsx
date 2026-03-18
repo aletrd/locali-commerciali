@@ -4,7 +4,7 @@ import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
 import { createAdminClient } from '@/lib/supabase'
 import { CATEGORIE_INFO, CITTA_PRINCIPALI } from '@/types'
-
+export const revalidate = 0
 export const metadata: Metadata = {
   title: 'LocaliCommerciali.it — Negozi, Uffici e Locali Commerciali',
   description: 'Trova negozi, uffici, bar, magazzini e capannoni in vendita o affitto in tutta Italia.',
