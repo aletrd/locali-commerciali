@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer'
 import AnnuncioCard from '@/components/annunci/AnnuncioCard'
 import { createServerClient } from '@/lib/supabase'
 import { PIANI_INFO } from '@/types'
-
+export const dynamic = 'force-dynamic'
 export default async function DashboardPage() {
   const supabase = createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
