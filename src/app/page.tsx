@@ -11,122 +11,100 @@ export const metadata: Metadata = {
 }
 
 const PIANI = [
-  { id: 'gratuito', nome: 'Gratuito', prezzo: 0, features: ['1 annuncio attivo', 'Max 5 foto', '1.5% sulla vendita'], evidenziato: false },
-  { id: 'base', nome: 'Base', prezzo: 19, features: ['5 annunci attivi', 'Max 15 foto', 'Nessuna commissione', 'Statistiche base'], evidenziato: false },
-  { id: 'pro', nome: 'Pro', prezzo: 49, features: ['Annunci illimitati', 'Foto illimitate', 'Badge in evidenza', 'Statistiche avanzate'], evidenziato: true },
-  { id: 'agenzia', nome: 'Agenzia', prezzo: 99, features: ['Tutto il piano Pro', 'Profilo verificato', 'Gestione team', 'Account manager'], evidenziato: false },
+  { id: 'gratuito', nome: 'Gratuito', prezzo: 0, features: ['1 annuncio attivo', 'Max 5 foto', '1.5% sulla vendita'], ev: false },
+  { id: 'base', nome: 'Base', prezzo: 19, features: ['5 annunci attivi', 'Max 15 foto', 'Nessuna commissione'], ev: false },
+  { id: 'pro', nome: 'Pro', prezzo: 49, features: ['Annunci illimitati', 'Foto illimitate', 'Badge in evidenza', 'Statistiche avanzate'], ev: true },
+  { id: 'agenzia', nome: 'Agenzia', prezzo: 99, features: ['Tutto il piano Pro', 'Profilo verificato', 'Account manager'], ev: false },
 ]
 
 export default async function HomePage() {
   const supabase = createAdminClient()
-  const { data: ultimi } = await supabase.from('annunci').select('*').eq('attivo', true).order('created_at', { ascending: false }).limit(8)
-  const { count: totaleAnnunci } = await supabase.from('annunci').select('*', { count: 'exact', head: true }).eq('attivo', true)
+  const { data: ultimi } = await supabase.from('annunci').select('*').eq('attivo', true).order('created_at', { ascending: false }).limit(6)
+  const { count: tot } = await supabase.from('annunci').select('*', { count: 'exact', head: true }).eq('attivo', true)
   const categorie = Object.entries(CATEGORIE_INFO)
 
   return (
     <>
       <Navbar />
       <main>
-
-        {/* HERO */}
-        <section style={{background:'linear-gradient(135deg,#083D2E 0%,#0A5C44 100%)',padding:'80px 24px',textAlign:'center'}}>
-          <div style={{maxWidth:860,margin:'0 auto'}}>
-            <div style={{display:'inline-block',background:'rgba(255,255,255,0.12)',border:'1px solid rgba(255,255,255,0.2)',borderRadius:999,padding:'6px 16px',fontSize:13,color:'rgba(255,255,255,0.9)',marginBottom:24,fontWeight:500}}>
-              ⭐ Il portale #1 per i locali commerciali in Italia
-            </div>
-            <h1 style={{fontSize:52,fontWeight:800,color:'white',lineHeight:1.15,marginBottom:20}}>
-              Trova il locale<br/>commerciale ideale
-            </h1>
-            <p style={{fontSize:18,color:'rgba(255,255,255,0.75)',marginBottom:40,maxWidth:600,margin:'0 auto 40px'}}>
-              Negozi, uffici, bar, magazzini e capannoni in vendita e affitto.
-              {totaleAnnunci ? ` Oltre ${totaleAnnunci.toLocaleString('it-IT')} annunci verificati.` : ''}
-            </p>
-           <form action="/annunci" method="get" style={{background:'white',borderRadius:20,padding:16,maxWidth:500,margin:'0 auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
-              <input name="citta" type="text" placeholder="🏙️  Città o zona..." style={{flex:2,minWidth:160,border:'none',outline:'none',padding:'10px 14px',fontSize:15,color:'#1C1C1E',background:'transparent'}} />
-              <select name="categoria" style={{flex:1,minWidth:140,border:'none',outline:'none',padding:'10px 8px',fontSize:14,color:'#1C1C1E',background:'transparent',borderLeft:'1px solid #E5E5EA'}}>
-                <option value="">Tutte le categorie</option>
+        <section style={{background:'linear-gradient(160deg,#083D2E,#0E6B4E)',padding:'48px 20px 56px',textAlign:'center'}}>
+          <p style={{color:'rgba(255,255,255,0.7)',fontSize:13,marginBottom:12,fontWeight:500,letterSpacing:1,textTransform:'uppercase'}}>
+            Portale #1 Locali Commerciali Italia
+          </p>
+          <h1 style={{fontSize:34,fontWeight:800,color:'white',lineHeight:1.2,marginBottom:12}}>
+            Trova il locale<br/>commerciale ideale
+          </h1>
+          <p style={{fontSize:15,color:'rgba(255,255,255,0.7)',marginBottom:28,lineHeight:1.6}}>
+            Negozi, uffici, bar, magazzini, capannoni.<br/>
+            {tot ? `Oltre ${tot.toLocaleString('it-IT')} annunci verificati.` : 'In tutta Italia.'}
+          </p>
+          <form action="/annunci" method="get" style={{background:'white',borderRadius:16,padding:12,maxWidth:420,margin:'0 auto',boxShadow:'0 8px 32px rgba(0,0,0,0.2)'}}>
+            <input name="citta" type="text" placeholder="📍 Città o zona..."
+              style={{display:'block',width:'100%',border:'1px solid #E5E5EA',borderRadius:10,padding:'11px 14px',fontSize:15,marginBottom:8,boxSizing:'border-box' as const,outline:'none'}} />
+            <div style={{display:'flex',gap:8,marginBottom:10}}>
+              <select name="categoria" style={{flex:1,border:'1px solid #E5E5EA',borderRadius:10,padding:'11px 10px',fontSize:13,background:'white',color:'#1C1C1E',outline:'none'}}>
+                <option value="">Categoria</option>
                 {categorie.map(([v,i]) => <option key={v} value={v}>{i.emoji} {i.label}</option>)}
               </select>
-              <select name="tipo" style={{minWidth:130,border:'none',outline:'none',padding:'10px 8px',fontSize:14,color:'#1C1C1E',background:'transparent',borderLeft:'1px solid #E5E5EA'}}>
-                <option value="">Vendita/Affitto</option>
-                <option value="vendita">In vendita</option>
-                <option value="affitto">In affitto</option>
+              <select name="tipo" style={{flex:1,border:'1px solid #E5E5EA',borderRadius:10,padding:'11px 10px',fontSize:13,background:'white',color:'#1C1C1E',outline:'none'}}>
+                <option value="">Tipo</option>
+                <option value="vendita">Vendita</option>
+                <option value="affitto">Affitto</option>
               </select>
-              <button type="submit" style={{background:'#0A5C44',color:'white',border:'none',padding:'12px 28px',borderRadius:14,fontSize:15,fontWeight:700,cursor:'pointer',whiteSpace:'nowrap'}}>
-                🔍 Cerca
-              </button>
-            </form>
-          </div>
+            </div>
+            <button type="submit" style={{display:'block',width:'100%',background:'#0A5C44',color:'white',border:'none',padding:'13px',borderRadius:10,fontSize:15,fontWeight:700,cursor:'pointer'}}>
+              🔍 Cerca annunci
+            </button>
+          </form>
         </section>
 
-        {/* STATISTICHE */}
-        <section style={{background:'white',borderBottom:'1px solid #E5E5EA',padding:'20px 24px'}}>
-          <div style={{maxWidth:1200,margin:'0 auto',display:'flex',justifyContent:'center',gap:60,flexWrap:'wrap'}}>
-            {[
-              {val: totaleAnnunci?.toLocaleString('it-IT') ?? '0', label:'Annunci attivi'},
-              {val:'12+', label:'Città principali'},
-              {val:'100%', label:'Annunci verificati'},
-            ].map(s => (
+        <section style={{background:'white',borderBottom:'1px solid #E5E5EA',padding:'16px 20px'}}>
+          <div style={{maxWidth:500,margin:'0 auto',display:'flex',justifyContent:'space-around'}}>
+            {[{val:tot?.toLocaleString('it-IT')||'0',label:'Annunci'},{val:'12+',label:'Città'},{val:'100%',label:'Verificati'}].map(s => (
               <div key={s.label} style={{textAlign:'center'}}>
-                <div style={{fontSize:28,fontWeight:800,color:'#0A5C44'}}>{s.val}</div>
-                <div style={{fontSize:13,color:'#8A8A8E',marginTop:2}}>{s.label}</div>
+                <div style={{fontSize:22,fontWeight:800,color:'#0A5C44'}}>{s.val}</div>
+                <div style={{fontSize:11,color:'#8A8A8E',marginTop:2}}>{s.label}</div>
               </div>
             ))}
           </div>
         </section>
 
-        {/* CATEGORIE */}
-        <section style={{padding:'60px 24px',maxWidth:1200,margin:'0 auto'}}>
-          <h2 style={{fontSize:30,fontWeight:700,marginBottom:8,color:'#1C1C1E'}}>Cerca per categoria</h2>
-          <p style={{color:'#8A8A8E',marginBottom:28,fontSize:15}}>Trova il tipo di locale che cerchi</p>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:14}}>
+        <section style={{padding:'40px 20px',maxWidth:800,margin:'0 auto'}}>
+          <h2 style={{fontSize:22,fontWeight:700,marginBottom:20,color:'#1C1C1E'}}>Cerca per categoria</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:10}}>
             {categorie.map(([slug,info]) => (
               <Link key={slug} href={`/annunci?categoria=${slug}`}
-                style={{background:'white',border:'1px solid #E5E5EA',borderRadius:16,padding:'20px 12px',textAlign:'center',textDecoration:'none',color:'#1C1C1E',display:'block',transition:'all 0.2s'}}>
-                <div style={{fontSize:36,marginBottom:10}}>{info.emoji}</div>
-                <div style={{fontSize:13,fontWeight:600,color:'#1C1C1E'}}>{info.label}</div>
+                style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'14px 8px',textAlign:'center',textDecoration:'none',color:'#1C1C1E',display:'block'}}>
+                <div style={{fontSize:28,marginBottom:6}}>{info.emoji}</div>
+                <div style={{fontSize:11,fontWeight:600}}>{info.label}</div>
               </Link>
             ))}
           </div>
         </section>
 
-        {/* ULTIMI ANNUNCI */}
         {ultimi && ultimi.length > 0 && (
-          <section style={{padding:'60px 24px',background:'#F5F5F7'}}>
-            <div style={{maxWidth:1200,margin:'0 auto'}}>
-              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:28}}>
-                <div>
-                  <h2 style={{fontSize:30,fontWeight:700,color:'#1C1C1E',marginBottom:4}}>Ultimi annunci</h2>
-                  <p style={{color:'#8A8A8E',fontSize:15}}>Le ultime opportunità pubblicate</p>
-                </div>
-                <Link href="/annunci" style={{color:'#0A5C44',fontWeight:600,textDecoration:'none',fontSize:14,border:'1px solid #0A5C44',padding:'8px 16px',borderRadius:10}}>
-                  Vedi tutti →
-                </Link>
+          <section style={{padding:'40px 20px',background:'#F5F5F7'}}>
+            <div style={{maxWidth:800,margin:'0 auto'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:20}}>
+                <h2 style={{fontSize:22,fontWeight:700,color:'#1C1C1E'}}>Ultimi annunci</h2>
+                <Link href="/annunci" style={{color:'#0A5C44',fontWeight:600,textDecoration:'none',fontSize:14}}>Vedi tutti →</Link>
               </div>
-              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(260px,1fr))',gap:20}}>
+              <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14}}>
                 {ultimi.map((a:any) => (
                   <Link key={a.id} href={`/annunci/${a.id}`}
-                    style={{background:'white',borderRadius:18,border:'1px solid #E5E5EA',overflow:'hidden',textDecoration:'none',color:'#1C1C1E',display:'block'}}>
-                    <div style={{height:180,background:'linear-gradient(135deg,#F0F7F4,#E8F5EF)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:60,position:'relative'}}>
+                    style={{background:'white',borderRadius:14,border:'1px solid #E5E5EA',overflow:'hidden',textDecoration:'none',color:'#1C1C1E',display:'block'}}>
+                    <div style={{height:120,background:'linear-gradient(135deg,#F0F7F4,#E0F0E8)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:44,position:'relative'}}>
                       {CATEGORIE_INFO[a.categoria as keyof typeof CATEGORIE_INFO]?.emoji ?? '🏢'}
-                      <div style={{position:'absolute',top:12,left:12,background:a.tipo==='vendita'?'#0A5C44':'#059669',color:'white',padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:700}}>
+                      <div style={{position:'absolute',top:8,left:8,background:a.tipo==='vendita'?'#0A5C44':'#059669',color:'white',padding:'3px 8px',borderRadius:999,fontSize:9,fontWeight:700}}>
                         {a.tipo==='vendita'?'Vendita':'Affitto'}
                       </div>
-                      {a.in_evidenza && (
-                        <div style={{position:'absolute',top:12,right:12,background:'#C49A2A',color:'white',padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:700}}>
-                          ⭐ Top
-                        </div>
-                      )}
                     </div>
-                    <div style={{padding:'16px 18px'}}>
-                      <div style={{fontSize:22,fontWeight:800,color:'#0A5C44',marginBottom:6}}>
+                    <div style={{padding:'12px 14px'}}>
+                      <div style={{fontSize:16,fontWeight:800,color:'#0A5C44',marginBottom:4}}>
                         €{a.prezzo?.toLocaleString('it-IT')}{a.tipo==='affitto'?'/mese':''}
                       </div>
-                      <div style={{fontSize:14,fontWeight:600,marginBottom:8,lineHeight:1.4,color:'#1C1C1E'}}>{a.titolo}</div>
-                      <div style={{fontSize:12,color:'#8A8A8E',display:'flex',gap:12,flexWrap:'wrap'}}>
-                        <span>📍 {a.citta}</span>
-                        {a.superficie_mq && <span>📐 {a.superficie_mq} mq</span>}
-                      </div>
+                      <div style={{fontSize:12,fontWeight:600,marginBottom:4,lineHeight:1.3}}>{a.titolo}</div>
+                      <div style={{fontSize:11,color:'#8A8A8E'}}>📍 {a.citta}</div>
                     </div>
                   </Link>
                 ))}
@@ -135,74 +113,47 @@ export default async function HomePage() {
           </section>
         )}
 
-        {/* CITTÀ */}
-        <section style={{padding:'60px 24px',maxWidth:1200,margin:'0 auto'}}>
-          <h2 style={{fontSize:30,fontWeight:700,marginBottom:8,color:'#1C1C1E'}}>Cerca nella tua città</h2>
-          <p style={{color:'#8A8A8E',marginBottom:28,fontSize:15}}>Locali commerciali nelle principali città italiane</p>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(150px,1fr))',gap:12}}>
+        <section style={{padding:'40px 20px',maxWidth:800,margin:'0 auto'}}>
+          <h2 style={{fontSize:22,fontWeight:700,marginBottom:20,color:'#1C1C1E'}}>Cerca nella tua città</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:10}}>
             {CITTA_PRINCIPALI.map(c => (
               <Link key={c.slug} href={`/citta/${c.slug}`}
-                style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'16px',textAlign:'center',textDecoration:'none',color:'#1C1C1E',fontWeight:600,fontSize:14,display:'block'}}>
-                📍 {c.nome}
+                style={{background:'white',border:'1px solid #E5E5EA',borderRadius:12,padding:'12px 8px',textAlign:'center',textDecoration:'none',color:'#1C1C1E',fontWeight:600,fontSize:13,display:'block'}}>
+                {c.nome}
               </Link>
             ))}
           </div>
         </section>
 
-        {/* PIANI */}
-        <section style={{padding:'60px 24px',background:'#F5F5F7'}}>
-          <div style={{maxWidth:1100,margin:'0 auto'}}>
-            <div style={{textAlign:'center',marginBottom:48}}>
-              <h2 style={{fontSize:36,fontWeight:800,color:'#1C1C1E',marginBottom:8}}>Piani per privati e agenzie</h2>
-              <p style={{color:'#8A8A8E',fontSize:16}}>Inizia gratis, cresci quando vuoi</p>
+        <section style={{padding:'40px 20px',background:'#F5F5F7'}}>
+          <div style={{maxWidth:800,margin:'0 auto'}}>
+            <div style={{textAlign:'center',marginBottom:32}}>
+              <h2 style={{fontSize:26,fontWeight:800,color:'#1C1C1E',marginBottom:6}}>Piani e prezzi</h2>
+              <p style={{color:'#8A8A8E',fontSize:14}}>Inizia gratis, cresci quando vuoi</p>
             </div>
-            <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:20}}>
-              {PIANI.map(piano => (
-                <div key={piano.id} style={{background:piano.evidenziato?'#0A5C44':'white',border:piano.evidenziato?'none':'1px solid #E5E5EA',borderRadius:20,padding:'28px 24px',display:'flex',flexDirection:'column',position:'relative'}}>
-                  {piano.evidenziato && (
-                    <div style={{position:'absolute',top:-14,left:'50%',transform:'translateX(-50%)',background:'#C49A2A',color:'white',padding:'4px 16px',borderRadius:999,fontSize:12,fontWeight:700,whiteSpace:'nowrap'}}>
-                      ⭐ Più popolare
-                    </div>
-                  )}
-                  <h3 style={{fontSize:22,fontWeight:700,color:piano.evidenziato?'white':'#1C1C1E',marginBottom:8}}>{piano.nome}</h3>
-                  <div style={{fontSize:40,fontWeight:800,color:piano.evidenziato?'white':'#0A5C44',marginBottom:20}}>
-                    {piano.prezzo===0?'Gratis':`€${piano.prezzo}`}
-                    {piano.prezzo>0&&<span style={{fontSize:14,fontWeight:400,color:piano.evidenziato?'rgba(255,255,255,0.6)':'#8A8A8E'}}>/mese</span>}
+            <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:14}}>
+              {PIANI.map(p => (
+                <div key={p.id} style={{background:p.ev?'#0A5C44':'white',border:p.ev?'none':'1px solid #E5E5EA',borderRadius:18,padding:'20px 16px',display:'flex',flexDirection:'column',position:'relative'}}>
+                  {p.ev && <div style={{position:'absolute',top:-12,left:'50%',transform:'translateX(-50%)',background:'#C49A2A',color:'white',padding:'3px 12px',borderRadius:999,fontSize:11,fontWeight:700,whiteSpace:'nowrap'}}>⭐ Top</div>}
+                  <h3 style={{fontSize:16,fontWeight:700,color:p.ev?'white':'#1C1C1E',marginBottom:4}}>{p.nome}</h3>
+                  <div style={{fontSize:28,fontWeight:800,color:p.ev?'white':'#0A5C44',marginBottom:12}}>
+                    {p.prezzo===0?'Gratis':`€${p.prezzo}`}
+                    {p.prezzo>0&&<span style={{fontSize:12,fontWeight:400,color:p.ev?'rgba(255,255,255,0.6)':'#8A8A8E'}}>/mese</span>}
                   </div>
-                  <ul style={{flex:1,marginBottom:24,listStyle:'none',padding:0}}>
-                    {piano.features.map(f => (
-                      <li key={f} style={{fontSize:13,color:piano.evidenziato?'rgba(255,255,255,0.85)':'#3A3A3C',marginBottom:10,display:'flex',alignItems:'flex-start',gap:8}}>
+                  <ul style={{flex:1,marginBottom:16,listStyle:'none',padding:0}}>
+                    {p.features.map(f => (
+                      <li key={f} style={{fontSize:12,color:p.ev?'rgba(255,255,255,0.85)':'#3A3A3C',marginBottom:6,display:'flex',gap:6}}>
                         <span style={{color:'#C49A2A',flexShrink:0}}>✓</span>{f}
                       </li>
                     ))}
                   </ul>
-                  <Link href={piano.prezzo===0?'/registrati':'/prezzi'}
-                    style={{display:'block',textAlign:'center',padding:'12px 16px',borderRadius:12,fontWeight:600,fontSize:14,textDecoration:'none',background:piano.evidenziato?'#C49A2A':'transparent',color:piano.evidenziato?'white':'#0A5C44',border:piano.evidenziato?'none':'2px solid #0A5C44'}}>
-                    {piano.prezzo===0?'Inizia gratis':`Scegli ${piano.nome}`}
+                  <Link href={p.prezzo===0?'/registrati':'/prezzi'}
+                    style={{display:'block',textAlign:'center',padding:'10px',borderRadius:10,fontWeight:600,fontSize:13,textDecoration:'none',background:p.ev?'#C49A2A':'transparent',color:p.ev?'white':'#0A5C44',border:p.ev?'none':'2px solid #0A5C44'}}>
+                    {p.prezzo===0?'Inizia gratis':`Scegli ${p.nome}`}
                   </Link>
                 </div>
               ))}
             </div>
-          </div>
-        </section>
-
-        {/* PERCHÉ NOI */}
-        <section style={{padding:'60px 24px',maxWidth:1200,margin:'0 auto'}}>
-          <h2 style={{fontSize:30,fontWeight:700,textAlign:'center',marginBottom:48,color:'#1C1C1E'}}>Perché scegliere LocaliCommerciali.it</h2>
-          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fit,minmax(220px,1fr))',gap:32}}>
-            {[
-              {icon:'🛡️',titolo:'Annunci verificati',desc:'Ogni annuncio viene revisionato dal nostro team prima della pubblicazione.'},
-              {icon:'📈',titolo:'Massima visibilità',desc:'I tuoi annunci vengono indicizzati su Google in pochi minuti.'},
-              {icon:'🚫',titolo:'Zero pubblicità',desc:'Nessun banner, nessuna interruzione. Solo annunci veri.'},
-            ].map(item => (
-              <div key={item.titolo} style={{textAlign:'center'}}>
-                <div style={{width:64,height:64,background:'#F0F7F4',borderRadius:20,display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,margin:'0 auto 16px'}}>
-                  {item.icon}
-                </div>
-                <h3 style={{fontSize:17,fontWeight:700,marginBottom:8,color:'#1C1C1E'}}>{item.titolo}</h3>
-                <p style={{fontSize:14,color:'#8A8A8E',lineHeight:1.6}}>{item.desc}</p>
-              </div>
-            ))}
           </div>
         </section>
 
