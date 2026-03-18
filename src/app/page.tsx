@@ -41,7 +41,7 @@ export default async function HomePage() {
               Negozi, uffici, bar, magazzini e capannoni in vendita e affitto.
               {totaleAnnunci ? ` Oltre ${totaleAnnunci.toLocaleString('it-IT')} annunci verificati.` : ''}
             </p>
-            <form action="/annunci" method="get" style={{background:'white',borderRadius:20,padding:10,display:'flex',gap:8,maxWidth:680,margin:'0 auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)',flexWrap:'wrap'}}>
+           <form action="/annunci" method="get" style={{background:'white',borderRadius:20,padding:16,maxWidth:500,margin:'0 auto',boxShadow:'0 20px 60px rgba(0,0,0,0.2)'}}>
               <input name="citta" type="text" placeholder="🏙️  Città o zona..." style={{flex:2,minWidth:160,border:'none',outline:'none',padding:'10px 14px',fontSize:15,color:'#1C1C1E',background:'transparent'}} />
               <select name="categoria" style={{flex:1,minWidth:140,border:'none',outline:'none',padding:'10px 8px',fontSize:14,color:'#1C1C1E',background:'transparent',borderLeft:'1px solid #E5E5EA'}}>
                 <option value="">Tutte le categorie</option>
