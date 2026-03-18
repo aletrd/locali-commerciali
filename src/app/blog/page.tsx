@@ -6,7 +6,7 @@ import Footer from '@/components/layout/Footer'
 import { createServerClient } from '@/lib/supabase'
 import { formatData, tempoLettura } from '@/lib/utils'
 import type { ArticoloBlog } from '@/types'
-
+export const dynamic = 'force-dynamic'
 export const metadata: Metadata = {
   title: 'Blog — Guide e Consigli sui Locali Commerciali',
   description: 'Guide pratiche su come comprare, vendere e affittare locali commerciali. Consigli di esperti, normative, mercato immobiliare.',
