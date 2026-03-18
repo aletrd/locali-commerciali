@@ -1,137 +1,122 @@
 import { redirect } from 'next/navigation'
 import Link from 'next/link'
-import { BarChart2, FileText, Star, MessageSquare, Heart, Settings, LogOut, Plus } from 'lucide-react'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import AnnuncioCard from '@/components/annunci/AnnuncioCard'
-import { createServerClient } from '@/lib/supabase'
-import { PIANI_INFO } from '@/types'
+import { createServerClient, createAdminClient } from '@/lib/supabase'
+
 export const dynamic = 'force-dynamic'
+
 export default async function DashboardPage() {
-  const supabase = createServerClient()
+  const supabase = await createServerClient()
   const { data: { user } } = await supabase.auth.getUser()
   if (!user) redirect('/login?redirect=/dashboard')
 
-  const [{ data: profilo }, { data: annunci }, { data: messaggiNonLetti }] = await Promise.all([
-    supabase.from('profiles').select('*').eq('id', user.id).single(),
-    supabase.from('annunci').select('*').eq('user_id', user.id).order('created_at', { ascending: false }),
-    supabase.from('chat_messaggi').select('id', { count: 'exact' })
-      .eq('letto', false).neq('mittente', user.id),
-  ])
+  const admin = createAdminClient()
+  const { data: profilo } = await admin.from('profiles').select('*').eq('id', user.id).single()
+  const { data: annunci } = await admin.from('annunci').select('*').eq('user_id', user.id).order('created_at', { ascending: false })
 
-  const pianoInfo = PIANI_INFO.find(p => p.id === profilo?.piano)
-  const annunciAttivi = annunci?.filter(a => a.attivo).length ?? 0
-  const totVis = annunci?.reduce((s, a) => s + (a.visualizzazioni ?? 0), 0) ?? 0
-  const limiteAnnunci = pianoInfo?.id === 'gratuito' ? 1
-    : pianoInfo?.id === 'base' ? 5 : 999
+  const annunciAttivi = annunci?.filter((a: any) => a.attivo).length ?? 0
 
   return (
     <>
       <Navbar />
-      <main className="max-w-7xl mx-auto px-4 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-
-          {/* Sidebar */}
-          <aside className="lg:col-span-1">
-            <div className="card p-6 sticky top-24">
-              {/* Avatar + info */}
-              <div className="flex items-center gap-3 mb-6 pb-6 border-b border-gray-100">
-                <div className="w-12 h-12 bg-primary-600 rounded-xl flex items-center justify-center text-white font-bold text-lg">
-                  {(profilo?.full_name ?? user.email ?? 'U').charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-dark truncate">{profilo?.full_name ?? 'Utente'}</p>
-                  <div className="flex items-center gap-1.5 mt-0.5">
-                    <span className="badge bg-primary-50 text-primary-700 text-xs">
-                      Piano {profilo?.piano}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Menu */}
-              <nav className="space-y-1">
-                {[
-                  { href: '/dashboard', icon: BarChart2, label: 'Dashboard' },
-                  { href: '/dashboard/annunci', icon: FileText, label: 'I miei annunci' },
-                  { href: '/chat', icon: MessageSquare, label: 'Messaggi', badge: messaggiNonLetti?.length ?? 0 },
-                  { href: '/preferiti', icon: Heart, label: 'Preferiti' },
-                  { href: '/dashboard/fatture', icon: FileText, label: 'Fatture' },
-                  { href: '/profilo', icon: Settings, label: 'Impostazioni' },
-                  ...(profilo?.role === 'admin' ? [{ href: '/admin', icon: Star, label: '🔑 Admin' }] : []),
-                ].map(item => (
-                  <Link key={item.href} href={item.href}
-                    className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-dark-mid hover:bg-gray-50 hover:text-primary-600 transition-colors">
-                    <item.icon size={17} />
-                    <span className="flex-1">{item.label}</span>
-                    {(item as any).badge > 0 && (
-                      <span className="badge bg-primary-600 text-white text-xs">{(item as any).badge}</span>
-                    )}
-                  </Link>
-                ))}
-              </nav>
-            </div>
-          </aside>
-
-          {/* Contenuto principale */}
-          <div className="lg:col-span-3 space-y-6">
-
-            {/* Statistiche */}
-            <div className="grid grid-cols-3 gap-4">
-              {[
-                { label: 'Annunci attivi', val: `${annunciAttivi} / ${limiteAnnunci === 999 ? '∞' : limiteAnnunci}` },
-                { label: 'Visualizzazioni totali', val: totVis.toLocaleString('it-IT') },
-                { label: 'Messaggi non letti', val: messaggiNonLetti?.length ?? 0 },
-              ].map(s => (
-                <div key={s.label} className="card p-5 text-center">
-                  <p className="text-2xl font-extrabold text-primary-600">{s.val}</p>
-                  <p className="text-xs text-mid mt-1">{s.label}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Banner piano */}
-            {profilo?.piano === 'gratuito' && (
-              <div className="card p-5 bg-amber-50 border-amber-200 flex items-center justify-between gap-4">
-                <div>
-                  <p className="font-semibold text-dark">Stai usando il piano Gratuito</p>
-                  <p className="text-sm text-mid mt-0.5">
-                    Passa a Base per 5 annunci senza commissioni, o a Pro per annunci illimitati.
-                  </p>
-                </div>
-                <Link href="/prezzi" className="btn-primary text-sm py-2 px-4 shrink-0">
-                  Upgrade ↗
-                </Link>
-              </div>
-            )}
-
-            {/* I miei annunci */}
-            <div>
-              <div className="flex items-center justify-between mb-5">
-                <h2 className="text-xl font-bold text-dark">I miei annunci</h2>
-                {annunciAttivi < limiteAnnunci && (
-                  <Link href="/crea-annuncio" className="btn-primary text-sm py-2 px-4">
-                    <Plus size={16} />
-                    Nuovo annuncio
-                  </Link>
-                )}
-              </div>
-
-              {!annunci || annunci.length === 0 ? (
-                <div className="card p-12 text-center">
-                  <p className="text-4xl mb-4">📋</p>
-                  <h3 className="text-lg font-semibold mb-2">Nessun annuncio ancora</h3>
-                  <p className="text-mid mb-6">Pubblica il tuo primo annuncio gratuitamente</p>
-                  <Link href="/crea-annuncio" className="btn-primary">Pubblica annuncio</Link>
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                  {annunci.map(a => <AnnuncioCard key={a.id} annuncio={a as any} />)}
-                </div>
-              )}
-            </div>
-          </div>
+      <main style={{maxWidth:800,margin:'0 auto',padding:'32px 20px'}}>
+        
+        {/* Header */}
+        <div style={{marginBottom:32}}>
+          <h1 style={{fontSize:26,fontWeight:800,color:'#1C1C1E',marginBottom:4}}>
+            Ciao, {profilo?.full_name?.split(' ')[0] ?? 'Utente'}! 👋
+          </h1>
+          <p style={{color:'#8A8A8E',fontSize:14}}>
+            Piano {profilo?.piano ?? 'gratuito'} · {user.email}
+          </p>
         </div>
+
+        {/* Statistiche */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(3,1fr)',gap:14,marginBottom:24}}>
+          {[
+            {label:'Annunci attivi', val:annunciAttivi},
+            {label:'Visualizzazioni', val:0},
+            {label:'Piano', val:profilo?.piano ?? 'gratuito'},
+          ].map(s => (
+            <div key={s.label} style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'16px 12px',textAlign:'center'}}>
+              <div style={{fontSize:20,fontWeight:800,color:'#0A5C44'}}>{s.val}</div>
+              <div style={{fontSize:11,color:'#8A8A8E',marginTop:4}}>{s.label}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Banner upgrade */}
+        {profilo?.piano === 'gratuito' && (
+          <div style={{background:'#FFF8E6',border:'1px solid #F0D080',borderRadius:14,padding:'16px 20px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,gap:12}}>
+            <p style={{fontSize:14,color:'#1C1C1E',margin:0}}>Passa a un piano a pagamento per più annunci e zero commissioni.</p>
+            <Link href="/prezzi" style={{background:'#C49A2A',color:'white',padding:'8px 16px',borderRadius:10,textDecoration:'none',fontSize:13,fontWeight:600,whiteSpace:'nowrap'}}>
+              Upgrade
+            </Link>
+          </div>
+        )}
+
+        {/* Admin banner */}
+        {profilo?.role === 'admin' && (
+          <div style={{background:'#FFF0F0',border:'1px solid #FFB0B0',borderRadius:14,padding:'16px 20px',display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24,gap:12}}>
+            <p style={{fontSize:14,fontWeight:600,color:'#1C1C1E',margin:0}}>🔑 Sei l'amministratore del sito</p>
+            <Link href="/admin" style={{background:'#DC2626',color:'white',padding:'8px 16px',borderRadius:10,textDecoration:'none',fontSize:13,fontWeight:600}}>
+              Pannello Admin
+            </Link>
+          </div>
+        )}
+
+        {/* Menu rapido */}
+        <div style={{display:'grid',gridTemplateColumns:'repeat(2,1fr)',gap:12,marginBottom:32}}>
+          {[
+            {href:'/crea-annuncio', icon:'➕', label:'Nuovo annuncio'},
+            {href:'/chat', icon:'💬', label:'Messaggi'},
+            {href:'/preferiti', icon:'❤️', label:'Preferiti'},
+            {href:'/profilo', icon:'⚙️', label:'Impostazioni'},
+          ].map(item => (
+            <Link key={item.href} href={item.href}
+              style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'16px',textDecoration:'none',color:'#1C1C1E',display:'flex',alignItems:'center',gap:12}}>
+              <span style={{fontSize:22}}>{item.icon}</span>
+              <span style={{fontSize:14,fontWeight:600}}>{item.label}</span>
+            </Link>
+          ))}
+        </div>
+
+        {/* Annunci */}
+        <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:16}}>
+          <h2 style={{fontSize:18,fontWeight:700,color:'#1C1C1E'}}>I miei annunci</h2>
+          <Link href="/crea-annuncio" style={{background:'#0A5C44',color:'white',padding:'8px 16px',borderRadius:10,textDecoration:'none',fontSize:13,fontWeight:600}}>
+            + Nuovo
+          </Link>
+        </div>
+
+        {!annunci || annunci.length === 0 ? (
+          <div style={{background:'white',border:'1px solid #E5E5EA',borderRadius:16,padding:'48px 24px',textAlign:'center'}}>
+            <div style={{fontSize:48,marginBottom:12}}>📋</div>
+            <h3 style={{fontSize:16,fontWeight:600,marginBottom:8}}>Nessun annuncio ancora</h3>
+            <p style={{color:'#8A8A8E',fontSize:14,marginBottom:20}}>Pubblica il tuo primo annuncio gratuitamente</p>
+            <Link href="/crea-annuncio" style={{background:'#0A5C44',color:'white',padding:'12px 24px',borderRadius:12,textDecoration:'none',fontWeight:600}}>
+              Pubblica annuncio
+            </Link>
+          </div>
+        ) : (
+          <div style={{display:'grid',gap:12}}>
+            {annunci.map((a: any) => (
+              <div key={a.id} style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'16px',display:'flex',gap:14,alignItems:'center'}}>
+                <div style={{width:56,height:56,background:'#F0F7F4',borderRadius:12,display:'flex',alignItems:'center',justifyContent:'center',fontSize:28,flexShrink:0}}>
+                  🏢
+                </div>
+                <div style={{flex:1,minWidth:0}}>
+                  <p style={{fontWeight:600,fontSize:14,marginBottom:2,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{a.titolo}</p>
+                  <p style={{fontSize:12,color:'#8A8A8E'}}>📍 {a.citta} · €{a.prezzo?.toLocaleString('it-IT')}</p>
+                </div>
+                <span style={{background:a.attivo?'#F0FFF4':'#FFF0F0',color:a.attivo?'#059669':'#DC2626',padding:'4px 10px',borderRadius:999,fontSize:11,fontWeight:600,flexShrink:0}}>
+                  {a.attivo?'Attivo':'Inattivo'}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </main>
       <Footer />
     </>
