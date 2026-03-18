@@ -167,3 +167,4 @@ farà il deploy automaticamente.
 | PayPal | % sulle transazioni | ~3.4% |
 | Dominio .it | — | ~€10/anno |
 | **Totale fisso** | | **~€45/mese** |
+
