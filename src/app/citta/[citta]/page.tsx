@@ -6,7 +6,7 @@ import AnnuncioCard from '@/components/annunci/AnnuncioCard'
 import { createServerClient } from '@/lib/supabase'
 import { CATEGORIE_INFO, CITTA_PRINCIPALI } from '@/types'
 import { formatPrezzo } from '@/lib/utils'
-
+export const dynamic = 'force-dynamic'
 interface Props { params: { citta: string } }
 
 export async function generateStaticParams() {
