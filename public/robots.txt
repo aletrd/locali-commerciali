@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+
+Disallow: /dashboard
+Disallow: /admin
+Disallow: /profilo
+Disallow: /crea-annuncio
+Disallow: /login
+Disallow: /registrati
+Disallow: /api/
+
+Sitemap: https://www.localicommerciali.it/sitemap.xml
+
+Crawl-delay: 1
+
+User-agent: Googlebot
+Allow: /
+Crawl-delay: 0
