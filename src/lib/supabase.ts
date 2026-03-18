@@ -1,30 +1,30 @@
-// src/lib/supabase.ts
 import { createBrowserClient } from '@supabase/ssr'
-import { createServerClient as _createServerClient } from '@supabase/ssr'
-import { cookies } from 'next/headers'
+import { createClient as createSupabaseClient } from '@supabase/supabase-js'
 
 const url  = process.env.NEXT_PUBLIC_SUPABASE_URL!
 const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
 
-// Client-side (browser)
 export function createClient() {
   return createBrowserClient(url, anon)
 }
 
-// Server-side (Server Components, Route Handlers, Server Actions)
-export function createServerClient() {
+export async function createServerClient() {
+  const { cookies } = await import('next/headers')
+  const { createServerClient: _create } = await import('@supabase/ssr')
   const cookieStore = cookies()
-  return _createServerClient(url, anon, {
+  return _create(url, anon, {
     cookies: {
-      get(name: string) { return cookieStore.get(name)?.value },
+      get(name: string) {
+        return cookieStore.get(name)?.value
+      },
     },
   })
 }
 
-// Admin client (solo nelle API routes — mai esporre al browser)
 export function createAdminClient() {
-  const { createClient } = require('@supabase/supabase-js')
-  return createClient(url, process.env.SUPABASE_SERVICE_ROLE_KEY!, {
-    auth: { autoRefreshToken: false, persistSession: false },
-  })
+  return createSupabaseClient(
+    url,
+    process.env.SUPABASE_SERVICE_ROLE_KEY!,
+    { auth: { autoRefreshToken: false, persistSession: false } }
+  )
 }
