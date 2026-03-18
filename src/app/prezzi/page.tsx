@@ -10,7 +10,7 @@ import { cn } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
 type Metodo = 'stripe' | 'paypal' | 'bonifico'
-
+export const dynamic = 'force-dynamic'
 export default function PrezziPage() {
   const [loading, setLoading] = useState<string | null>(null)
   const [metodo, setMetodo] = useState<Metodo>('stripe')
