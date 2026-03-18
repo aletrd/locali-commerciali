@@ -9,7 +9,7 @@ export const metadata: Metadata = {
   title: 'LocaliCommerciali.it — Negozi, Uffici e Locali Commerciali',
   description: 'Trova negozi, uffici, bar, magazzini e capannoni in vendita o affitto in tutta Italia.',
 }
-
+export const dynamic = 'force-dynamic'
 const PIANI = [
   { id: 'gratuito', nome: 'Gratuito', prezzo: 0, features: ['1 annuncio attivo', 'Max 5 foto', '1.5% sulla vendita'], ev: false },
   { id: 'base', nome: 'Base', prezzo: 19, features: ['5 annunci attivi', 'Max 15 foto', 'Nessuna commissione'], ev: false },
