@@ -3,8 +3,18 @@ on: push
 jobs:
   extract:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     steps:
       - uses: actions/checkout@v3
-      - run: unzip locali-github-upload.zip -d . && rm locali-github-upload.zip
-      - run: git config user.email "action@github.com" && git config user.name "Action"
-      - run: git add . && git commit -m "estrai files" && git push
+      - name: Unzip
+        run: unzip -o locali-github-upload.zip
+      - name: Remove ZIP
+        run: rm locali-github-upload.zip
+      - name: Push files
+        run: |
+          git config user.email "action@github.com"
+          git config user.name "GitHub Action"
+          git add -A
+          git commit -m "estrai files" || echo "nothing to commit"
+          git push
