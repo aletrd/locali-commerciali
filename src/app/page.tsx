@@ -2,9 +2,8 @@ import type { Metadata } from 'next'
 import Link from 'next/link'
 import Navbar from '@/components/layout/Navbar'
 import Footer from '@/components/layout/Footer'
-import AnnuncioCard from '@/components/annunci/AnnuncioCard'
 import { createAdminClient } from '@/lib/supabase'
-import { CATEGORIE_INFO, PIANI_INFO, CITTA_PRINCIPALI } from '@/types'
+import { CATEGORIE_INFO, CITTA_PRINCIPALI } from '@/types'
 
 export const metadata: Metadata = {
   title: 'LocaliCommerciali.it — Negozi, Uffici e Locali Commerciali',
@@ -21,64 +20,77 @@ export default async function HomePage() {
     <>
       <Navbar />
       <main>
-        <section className="bg-gradient-to-br from-[#083D2E] to-[#0A5C44] text-white py-20 px-4">
-          <div className="max-w-4xl mx-auto text-center">
-            <h1 className="text-4xl md:text-6xl font-semibold leading-tight mb-4">
+        {/* HERO */}
+        <section style={{background:'linear-gradient(135deg,#083D2E,#0A5C44)',color:'white',padding:'80px 24px',textAlign:'center'}}>
+          <div style={{maxWidth:800,margin:'0 auto'}}>
+            <h1 style={{fontSize:48,fontWeight:800,marginBottom:16,lineHeight:1.2}}>
               Trova il locale commerciale ideale
             </h1>
-            <p className="text-white/70 text-lg mb-10 max-w-2xl mx-auto">
+            <p style={{fontSize:18,opacity:0.8,marginBottom:32}}>
               Negozi, uffici, bar, magazzini e capannoni in vendita e in affitto in tutta Italia.
               {totaleAnnunci ? ` Oltre ${totaleAnnunci.toLocaleString('it-IT')} annunci.` : ''}
             </p>
-            <form action="/annunci" method="get" className="bg-white rounded-2xl p-2 flex flex-col sm:flex-row gap-2 max-w-3xl mx-auto">
-              <input name="citta" type="text" placeholder="Città o zona..." className="flex-1 outline-none text-gray-800 px-3 py-2 text-base bg-transparent" />
-              <select name="categoria" className="flex-1 px-3 py-2 text-gray-800 text-sm outline-none bg-transparent">
+            <form action="/annunci" method="get" style={{background:'white',borderRadius:16,padding:8,display:'flex',gap:8,maxWidth:700,margin:'0 auto',flexWrap:'wrap'}}>
+              <input name="citta" type="text" placeholder="Città o zona..." style={{flex:1,minWidth:150,border:'none',outline:'none',padding:'10px 12px',fontSize:15,color:'#1C1C1E',background:'transparent'}} />
+              <select name="categoria" style={{flex:1,minWidth:150,border:'none',outline:'none',padding:'10px 12px',fontSize:14,color:'#1C1C1E',background:'transparent'}}>
                 <option value="">Tutte le categorie</option>
                 {categorie.map(([v, i]) => <option key={v} value={v}>{i.emoji} {i.label}</option>)}
               </select>
-              <button type="submit" className="bg-green-800 hover:bg-green-900 text-white font-semibold px-8 py-3 rounded-xl transition-colors shrink-0">Cerca</button>
+              <button type="submit" style={{background:'#0A5C44',color:'white',border:'none',padding:'12px 24px',borderRadius:12,fontSize:15,fontWeight:600,cursor:'pointer'}}>Cerca</button>
             </form>
           </div>
         </section>
 
-        <section className="py-16 px-4">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-8">Cerca per categoria</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-              {categorie.map(([slug, info]) => (
-                <Link key={slug} href={`/annunci?categoria=${slug}`} className="bg-white border border-gray-100 rounded-2xl hover:shadow-md transition-all p-4 text-center">
-                  <div className="text-3xl mb-2">{info.emoji}</div>
-                  <div className="text-sm font-semibold text-gray-900">{info.label}</div>
-                </Link>
-              ))}
-            </div>
+        {/* CATEGORIE */}
+        <section style={{padding:'48px 24px',maxWidth:1200,margin:'0 auto'}}>
+          <h2 style={{fontSize:28,fontWeight:700,marginBottom:24}}>Cerca per categoria</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(130px,1fr))',gap:12}}>
+            {categorie.map(([slug, info]) => (
+              <Link key={slug} href={`/annunci?categoria=${slug}`} style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:'16px 8px',textAlign:'center',textDecoration:'none',color:'#1C1C1E',display:'block'}}>
+                <div style={{fontSize:32,marginBottom:8}}>{info.emoji}</div>
+                <div style={{fontSize:13,fontWeight:600}}>{info.label}</div>
+              </Link>
+            ))}
           </div>
         </section>
 
+        {/* ULTIMI ANNUNCI */}
         {ultimi && ultimi.length > 0 && (
-          <section className="py-16 px-4 bg-gray-50">
-            <div className="max-w-7xl mx-auto">
-              <div className="flex items-center justify-between mb-8">
-                <h2 className="text-3xl font-semibold text-gray-900">Ultimi annunci</h2>
-                <Link href="/annunci" className="text-green-700 font-semibold text-sm hover:underline">Vedi tutti →</Link>
+          <section style={{padding:'48px 24px',background:'#F5F5F7',maxWidth:'100%'}}>
+            <div style={{maxWidth:1200,margin:'0 auto'}}>
+              <div style={{display:'flex',justifyContent:'space-between',alignItems:'center',marginBottom:24}}>
+                <h2 style={{fontSize:28,fontWeight:700}}>Ultimi annunci</h2>
+                <Link href="/annunci" style={{color:'#0A5C44',fontWeight:600,textDecoration:'none'}}>Vedi tutti →</Link>
               </div>
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                {ultimi.map((a: any) => <AnnuncioCard key={a.id} annuncio={a} compact />)}
+              <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(250px,1fr))',gap:20}}>
+                {ultimi.map((a: any) => (
+                  <Link key={a.id} href={`/annunci/${a.id}`} style={{background:'white',borderRadius:16,border:'1px solid #E5E5EA',overflow:'hidden',textDecoration:'none',color:'#1C1C1E',display:'block'}}>
+                    <div style={{height:160,background:'#F0F7F4',display:'flex',alignItems:'center',justifyContent:'center',fontSize:48}}>
+                      {CATEGORIE_INFO[a.categoria as keyof typeof CATEGORIE_INFO]?.emoji ?? '🏢'}
+                    </div>
+                    <div style={{padding:16}}>
+                      <div style={{fontSize:22,fontWeight:800,color:'#0A5C44',marginBottom:4}}>
+                        €{a.prezzo?.toLocaleString('it-IT')}{a.tipo === 'affitto' ? '/mese' : ''}
+                      </div>
+                      <div style={{fontSize:14,fontWeight:600,marginBottom:4,overflow:'hidden',display:'-webkit-box',WebkitLineClamp:2,WebkitBoxOrient:'vertical'}}>{a.titolo}</div>
+                      <div style={{fontSize:12,color:'#8A8A8E'}}>📍 {a.citta}</div>
+                    </div>
+                  </Link>
+                ))}
               </div>
             </div>
           </section>
         )}
 
-        <section className="py-16 px-4 bg-white">
-          <div className="max-w-7xl mx-auto">
-            <h2 className="text-3xl font-semibold text-gray-900 mb-8">Cerca nella tua città</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-              {CITTA_PRINCIPALI.map(c => (
-                <Link key={c.slug} href={`/citta/${c.slug}`} className="bg-white border border-gray-100 rounded-2xl hover:shadow-md transition-all p-4 text-center">
-                  <p className="font-semibold text-gray-900 text-sm">{c.nome}</p>
-                </Link>
-              ))}
-            </div>
+        {/* CITTÀ */}
+        <section style={{padding:'48px 24px',maxWidth:1200,margin:'0 auto'}}>
+          <h2 style={{fontSize:28,fontWeight:700,marginBottom:24}}>Cerca nella tua città</h2>
+          <div style={{display:'grid',gridTemplateColumns:'repeat(auto-fill,minmax(140px,1fr))',gap:12}}>
+            {CITTA_PRINCIPALI.map(c => (
+              <Link key={c.slug} href={`/citta/${c.slug}`} style={{background:'white',border:'1px solid #E5E5EA',borderRadius:14,padding:16,textAlign:'center',textDecoration:'none',color:'#1C1C1E',fontWeight:600,fontSize:14,display:'block'}}>
+                📍 {c.nome}
+              </Link>
+            ))}
           </div>
         </section>
       </main>
